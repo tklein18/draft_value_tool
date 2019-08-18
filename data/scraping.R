@@ -24,7 +24,7 @@ library(dplyr)
 for( i in c(2016:2018)){
   
   temp_url <- paste(
-    'https://www.fantasypros.com/nfl/reports/leaders/half-ppr.php?year=', 
+    'https://www.fantasypros.com/nfl/reports/leaders/?year=', 
     i, '&start=1&end=16', sep = ''
   )
   

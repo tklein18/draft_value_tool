@@ -52,10 +52,8 @@ ui <- fluidPage(
       selectizeInput(
         inputId = 'drafted', label = 'Enter Drafted Players', 
         choices = players, multiple = T, width = '100%'
-      ), h3('Top Reamaning Players'), 
-      tableOutput(outputId = 'top_remaining'), 
-      tableOutput(outputId = 'best_table'),
-      plotOutput(outputId = 'remaining_stock')
+      ), 
+      tableOutput(outputId = 'top_remaining')
     )
   )
 )
@@ -88,7 +86,7 @@ server <- function(input, output) {
     ) 
     ) %>% group_by(position) %>% 
       summarize(
-        proj_average = median(FPTS)
+        proj_average = mean(FPTS)
       )
   })
   
@@ -111,7 +109,7 @@ server <- function(input, output) {
         ) 
     ) %>% group_by(Position) %>% 
       summarize(
-        act_average = median(Points)
+        act_average = mean(FPTS)
       )
   })
   
@@ -146,68 +144,19 @@ server <- function(input, output) {
       proj_rank = rank(desc(proj_value), ties.method = 'first'), 
       act_rank = rank(desc(act_value), ties.method = 'first')
     )  %>% filter(
-      proj_rank <= 10 | act_rank <= 10
+      proj_rank >= 10 | act_rank >= 10
     ) %>% select(
       Name, proj_value, proj_rank, act_value, act_rank
     ) %>% rename(
       Projected_Value = proj_value, 
-      Projected_Rank = proj_rank, 
+      proj_rank = Projected_Rank, 
       Historical_Value = act_value, 
       Historical_Rank = act_rank
-    ) %>% arrange(Projected_Rank)
-    
-  })
-  
-  
-  
-  
-  
-  output$best_table <- renderTable({
-    
-    stock_graph <- available_adjusted() %>% group_by(position) %>%
-      mutate(
-        proj_rank = rank(desc(proj_value), ties.method = 'first')
-      ) %>% arrange(proj_rank) %>% mutate(
-        above_1 = FPTS - lead(FPTS, 1), 
-        above_5 = FPTS - lead(FPTS, 5),
-        above_10 = FPTS - lead(FPTS, 10), 
-        above_20 = FPTS - lead(FPTS, 20)
-      ) %>% filter(proj_rank == 1) %>% 
-      select(
-        Name, position, FPTS, above_1,
-        above_5, above_10, above_20
-        ) %>% rename(
-          Position = position, 
-          Projected_Points = FPTS, 
-          Points_Above_Next = above_1, 
-          Points_Above_5 = above_5,
-          Points_Above_10 = above_10, 
-          Points_Above_20 = above_20
-        ) %>% ungroup() %>% 
-      arrange(desc(Points_Above_Next))
-    
-  })
-  
-  
-  
-  
-  
-  output$remaining_stock <- renderPlot({
-    
-    stock_graph <- available_adjusted() %>% group_by(position) %>%
-      mutate(
-      proj_rank = rank(desc(proj_value), ties.method = 'first'), 
-      act_rank = rank(desc(act_value), ties.method = 'first')
-    )  %>% ungroup() %>% filter(
-      proj_rank <= (2*input$league_size)
     )
     
-    stock_graph %>% ggplot(aes(proj_rank, proj_value))+
-      geom_line(aes(color = position))+
-      geom_point(aes(color = position))+
-      theme_bw()
-    
   })
+  
+  
   
   
 }

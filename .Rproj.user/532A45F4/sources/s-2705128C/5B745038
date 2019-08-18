@@ -5,13 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3574551381",
+    "hash" : "0",
     "id" : "5B745038",
     "lastKnownWriteTime" : 1566144234,
     "last_content_update" : 1566144234,
     "path" : "~/Desktop/draft_value_tool/data/scraping.R",
     "project_path" : "data/scraping.R",
     "properties" : {
+        "cursorPosition" : "183,15",
+        "scrollLine" : "171"
     },
     "relative_order" : 1,
     "source_on_save" : false,

@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1566144417335.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3978163413",
+    "id" : "BEA435DE",
+    "lastKnownWriteTime" : 1566147408,
+    "last_content_update" : 1566147408466,
+    "path" : "~/Desktop/draft_value_tool/app.R",
+    "project_path" : "app.R",
+    "properties" : {
+        "cursorPosition" : "94,12",
+        "scrollLine" : "92"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
