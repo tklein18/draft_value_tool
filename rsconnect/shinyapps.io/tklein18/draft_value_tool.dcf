@@ -1,0 +1,12 @@
+name: draft_value_tool
+title: draft_value_tool
+username:
+account: tklein18
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1094730
+bundleId: 2332083
+url: https://tklein18.shinyapps.io/draft_value_tool/
+when: 1566157390.56978
+asMultiple: FALSE
+asStatic: FALSE
