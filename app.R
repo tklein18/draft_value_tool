@@ -18,6 +18,8 @@
 library(shiny)
 library(tidyverse)
 library(ggplot2)
+library(shinythemes)
+
 
 # data
 
@@ -40,6 +42,7 @@ players <- projections[, 'Name']
 
 # UI ============================================================================
 ui <- fluidPage(
+  theme = 'sandstone',
   titlePanel('Draft Value Tool'), 
   sidebarLayout(
     sidebarPanel(
@@ -58,6 +61,10 @@ ui <- fluidPage(
       numericInput(
         inputId = 'qb_yds', label = 'Enter Passing Yards per Point', 
         value = 25, min = 10, max = 25, step = 15
+      ), 
+      selectizeInput(
+        inputId = 'positions', label = 'Select Positions to not Show', 
+        choices = c('QB', 'WR', 'TE', 'RB'), multiple = T
       )
     ), 
     mainPanel(
@@ -98,7 +105,12 @@ server <- function(input, output) {
   
   
   available <- reactive({
-    projection_points() %>% filter(!Name %in% input$drafted)
+    
+    projection_points() %>% filter(
+      (!Name %in% input$drafted) & 
+        (!position %in% input$positions)
+      )
+    
   })
   
   
