@@ -96,7 +96,7 @@ fp_finishes <- fp_finishes %>% group_by(
 
 # reading in projection data =========================================================================
 
-'https://www.fantasypros.com/nfl/projections/qb.php?week=draft'
+
 
 finish_url_base <- 'https://www.fantasypros.com/nfl/projections/'
 
@@ -183,6 +183,110 @@ fp_projections <- fp_projections %>% group_by(
   finish = rank(desc(FPTS), ties.method = 'first')
 ) %>% ungroup()
 
+
+
+
+
+
+
+
+# projection v2 ======================================================================================
+
+
+proj_url_base <- 'https://www.fantasypros.com/nfl/projections/'
+
+positions <- c('qb', 'wr', 'rb', 'te')
+
+
+
+for(i in positions){
+  
+  temp_url <- paste(
+    proj_url_base, i, '.php?week=draft', sep = ''
+  )
+  
+  
+  temp_webpage <- read_html(temp_url)
+  
+  temp_tables <- html_nodes(temp_webpage, 'table')
+  
+  table_count <- c(1 : length(temp_tables))
+  
+  for( t in table_count){
+    
+    if(temp_tables[[t]] %>% html_table %>% 
+       nrow() > 30){
+      tbl_num <- t
+    }
+  }
+  
+  temp_finish <- temp_tables[[tbl_num]] %>% 
+    html_table()
+  
+  
+  names(temp_finish) <- str_c(temp_finish[1,], temp_finish[2,], sep='_')
+  
+  names(temp_finish) <- c('Player', names(temp_finish[,c(2:ncol(temp_finish))])) 
+  
+  temp_finish <- temp_finish[-c(1:2), ]
+  
+  
+  temp_assign <- paste(
+    'projection_', i, sep = ''
+  )
+  
+  temp_finish <- temp_finish %>% mutate(
+    position = toupper(i)
+  )
+  
+  assign(temp_assign, temp_finish)
+  
+  
+}
+
+
+
+
+
+
+
+# binding projects v2 ======================================================================================
+
+
+
+fp_projections <- bind_rows(
+  projection_qb, projection_wr, projection_rb, projection_te
+)
+
+
+
+fp_projections <- fp_projections %>% separate(
+  Player, into = c('first', 'last'), extra = 'drop', 
+  sep = ' '
+)
+
+fp_projections[, c('first', 'last')] <- lapply(
+  fp_projections[, c('first', 'last')], tolower
+)
+
+fp_projections <- fp_projections %>% filter(
+  !is.na(first) & !is.na(last)
+)
+
+
+fp_projections[is.na(fp_projections)] <- 0
+
+
+fp_projections[, c(3:12, 14:16)] <- lapply(
+  fp_projections[, c(3:12, 14:16)], 
+  function(x) str_replace(x, pattern = ',', replacement = '')
+)
+
+
+
+fp_projections[, c(3:12, 14:16)] <- lapply(
+  fp_projections[, c(3:12, 14:16)], as.numeric
+)
 
 
 

@@ -155,7 +155,7 @@
 140,"oakland","raiders","OAK","DST",101,15,6.7,2016,22
 141,"marqise","lee","JAC","WR",100.8,15,6.7,2016,45
 142,"nick","folk","FA","K",100,15,6.7,2016,22
-143,"dontrelle","inman","NE","WR",99.9,15,6.7,2016,46
+143,"dontrelle","inman","FA","WR",99.9,15,6.7,2016,46
 144,"dan","carpenter","FA","K",99,15,6.6,2016,23
 144,"los","angeles","LAR","DST",99,15,6.6,2016,23
 145,"james","white","NE","RB",98.7,15,6.6,2016,31
@@ -298,7 +298,7 @@
 275,"garrett","celek","SF","TE",44.1,13,3.4,2016,34
 276,"c.j.","prosise","SEA","RB",44,6,7.3,2016,63
 277,"charles","sims","FA","RB",43.9,7,6.3,2016,64
-278,"charcandrick","west","FA","RB",42.5,14,3,2016,65
+278,"charcandrick","west","IND","RB",42.5,14,3,2016,65
 279,"quinton","patton","FA","WR",40.8,13,3.1,2016,98
 280,"will","tye","PHI","TE",40.8,15,2.7,2016,35
 281,"wendell","smallwood","PHI","RB",40.7,12,3.4,2016,66
@@ -904,7 +904,7 @@
 263,"ed","dickson","SEA","TE",47.5,13,3.7,2017,28
 264,"bennie","fowler","NYG","WR",47.4,14,3.4,2017,82
 265,"bruce","ellington","FA","WR",46.7,11,4.2,2017,83
-266,"charcandrick","west","FA","RB",46.2,12,3.9,2017,69
+266,"charcandrick","west","IND","RB",46.2,12,3.9,2017,69
 267,"nick","novak","FA","K",46,7,6.6,2017,35
 268,"antonio","gates","FA","TE",45,15,3,2017,29
 269,"jamaal","charles","FA","RB",44.5,13,3.4,2017,70
@@ -955,7 +955,7 @@
 312,"mike","tolbert","FA","RB",32,11,2.9,2017,80
 313,"jarius","wright","CAR","WR",31.8,12,2.7,2017,101
 314,"chester","rogers","IND","WR",31.3,9,3.5,2017,102
-315,"dontrelle","inman","NE","WR",30.9,9,3.4,2017,103
+315,"dontrelle","inman","FA","WR",30.9,9,3.4,2017,103
 316,"aldrick","robinson","CAR","WR",30.8,13,2.4,2017,104
 317,"adam","shaheen","CHI","TE",30.7,7,4.4,2017,43
 318,"mike","davis","CHI","RB",30.7,5,6.1,2017,81
@@ -1580,7 +1580,7 @@
 292,"breshad","perriman","TB","WR",35.2,9,3.9,2018,106
 292,"rhett","ellison","NYG","TE",35.2,13,2.7,2018,33
 293,"keke","coutee","HOU","WR",34.7,6,5.8,2018,107
-293,"dontrelle","inman","NE","WR",34.7,7,5,2018,108
+293,"dontrelle","inman","FA","WR",34.7,7,5,2018,108
 294,"pierre","garcon","FA","WR",34.6,8,4.3,2018,109
 295,"isaiah","mckenzie","BUF","WR",34.5,7,4.9,2018,110
 295,"jack","doyle","IND","TE",34.5,6,5.8,2018,34
@@ -1710,7 +1710,7 @@
 402,"darrel","williams","KC","RB",10,3,3.3,2018,99
 402,"keith","ford","GB","RB",10,2,5,2018,100
 403,"dalton","schultz","DAL","TE",9.9,7,1.4,2018,78
-404,"charcandrick","west","FA","RB",9.8,1,9.8,2018,101
+404,"charcandrick","west","IND","RB",9.8,1,9.8,2018,101
 405,"de'anthony","thomas","FA","WR",9.5,5,1.9,2018,154
 405,"niles","paul","FA","TE",9.5,6,1.6,2018,79
 406,"darius","jennings","TEN","WR",9.4,13,0.7,2018,155

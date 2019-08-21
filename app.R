@@ -46,6 +46,18 @@ ui <- fluidPage(
       numericInput(
         inputId = 'league_size', label = 'Enter League Size', 
         value = 10, min = 8, max = 12, step = 1
+      ), 
+      numericInput(
+        inputId = 'ppr', label = 'Enter Points Per Reception', 
+        value = .5, min = 0, max = 1, step = .5
+      ), 
+      numericInput(
+        inputId = 'qb_tds', label = 'Enter Points per QB Touchdowns', 
+        value = 4, min = 4, max = 6, step = 2
+      ), 
+      numericInput(
+        inputId = 'qb_yds', label = 'Enter Passing Yards per Point', 
+        value = 25, min = 10, max = 25, step = 15
       )
     ), 
     mainPanel(
@@ -65,13 +77,33 @@ ui <- fluidPage(
 server <- function(input, output) {
   
   
+  projection_points <- reactive({
+    
+    projections %>% mutate(
+      Points = (PASSING_YDS / input$qb_yds) + (PASSING_TDS * input$qb_tds) +
+        (PASSING_INTS * -2) + (RUSHING_YDS * .1) + (RUSHING_TDS * 6) +
+        (RECEIVING_REC * input$ppr) + (RECEIVING_YDS * .1) +
+        (RECEIVING_TDS * 6) + (MISC_FL * -2)
+    )%>% group_by(
+      position
+    ) %>% mutate(
+      finish = rank(desc(Points), ties.method = 'first')
+    ) %>% ungroup() %>% select(
+      Name, position, Points, finish
+    )
+    
+  })
+  
+  
+  
+  
   available <- reactive({
-    projections <- projections %>% filter(!Name %in% input$drafted)
+    projection_points() %>% filter(!Name %in% input$drafted)
   })
   
   
   projection_averages <- reactive({
-    projections %>% filter(
+    projection_points() %>% filter(
       (
         position == 'QB' & 
           finish <= input$league_size
@@ -88,7 +120,7 @@ server <- function(input, output) {
     ) 
     ) %>% group_by(position) %>% 
       summarize(
-        proj_average = median(FPTS)
+        proj_average = median(Points)
       )
   })
   
@@ -131,8 +163,8 @@ server <- function(input, output) {
     )
     
     av_adj <- av_adj %>% mutate(
-      proj_value = FPTS - proj_average, 
-      act_value = FPTS - act_average
+      proj_value = Points - proj_average, 
+      act_value = Points - act_average
     )
     
     av_adj
@@ -168,17 +200,17 @@ server <- function(input, output) {
       mutate(
         proj_rank = rank(desc(proj_value), ties.method = 'first')
       ) %>% arrange(proj_rank) %>% mutate(
-        above_1 = FPTS - lead(FPTS, 1), 
-        above_5 = FPTS - lead(FPTS, 5),
-        above_10 = FPTS - lead(FPTS, 10), 
-        above_20 = FPTS - lead(FPTS, 20)
+        above_1 = Points - lead(Points, 1), 
+        above_5 = Points - lead(Points, 5),
+        above_10 = Points - lead(Points, 10), 
+        above_20 = Points - lead(Points, 20)
       ) %>% filter(proj_rank == 1) %>% 
       select(
-        Name, position, FPTS, above_1,
+        Name, position, Points, above_1,
         above_5, above_10, above_20
         ) %>% rename(
           Position = position, 
-          Projected_Points = FPTS, 
+          Projected_Points = Points, 
           Points_Above_Next = above_1, 
           Points_Above_5 = above_5,
           Points_Above_10 = above_10, 
