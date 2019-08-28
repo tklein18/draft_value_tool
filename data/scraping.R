@@ -15,45 +15,67 @@ library(dplyr)
 
 
 
-# reading in final rankings ======================================================================
+
+# finishes v2 ===============================================================================================
 
 
+finish_url_base <- 'https://www.fantasypros.com/nfl/stats/' 
 
 
+positions <- c('qb', 'wr', 'rb', 'te')
 
-for( i in c(2016:2018)){
+for(i in c(2016:2018)){
   
-  temp_url <- paste(
-    'https://www.fantasypros.com/nfl/reports/leaders/?year=', 
-    i, '&start=1&end=16', sep = ''
-  )
+  finish_holder <- data.frame()
   
-  temp_webpage <- read_html(temp_url)
-  
-  temp_tables <- html_nodes(temp_webpage, 'table')
-  
-  table_count <- c(1 : length(temp_tables))
-  
-  for( t in table_count){
+  for(p in positions){
     
-    if(temp_tables[[t]] %>% html_table %>% 
-       nrow() > 100){
-      tbl_num <- t
+    temp_url <- paste(
+      finish_url_base, p, '.php?year=', i,
+      '&range=full', sep = ''
+    )
+    
+    temp_webpage <- read_html(temp_url)
+    
+    temp_tables <- html_nodes(temp_webpage, 'table')
+    
+    table_count <- c(1 : length(temp_tables))
+    
+    for( t in table_count){
+      
+      if(temp_tables[[t]] %>% html_table %>% 
+         nrow() > 30){
+        tbl_num <- t
+      }
     }
+    
+    temp_finish <- temp_tables[[tbl_num]] %>% 
+      html_table()
+    
+    
+    names(temp_finish) <- str_c(temp_finish[1,], temp_finish[2,], sep='_')
+    
+    names(temp_finish) <- c('Player', names(temp_finish[,c(2:ncol(temp_finish))])) 
+    
+    temp_finish <- temp_finish[-c(1:2), ]
+    
+    temp_finish <- temp_finish %>% mutate(
+      position = toupper(p)
+    )
+    
+    finish_holder <- bind_rows(finish_holder, temp_finish)
   }
   
-  temp_finish <- temp_tables[[tbl_num]] %>% 
-    html_table()
-  
   temp_assign <- paste(
-    'finish_', substr(i, 3, 4), sep = ''
+    'finish_', i, sep = ''
   )
   
-  temp_finish <- temp_finish %>% mutate(
-    year = i
+  finish_holder <- finish_holder %>% mutate(
+    year = as.numeric(i)
   )
   
-  assign(temp_assign, temp_finish)
+  assign(temp_assign, finish_holder)
+  
   
 }
 
@@ -61,10 +83,12 @@ for( i in c(2016:2018)){
 
 
 
-# cleaning and binding finishes =====================================================================
+# binding finishes V2 ======================================================================================
+
+
 
 fp_finishes <- bind_rows(
-  finish_16, finish_17, finish_18
+  finish_2016, finish_2017, finish_2018
 )
 
 
@@ -83,106 +107,25 @@ fp_finishes <- fp_finishes %>% filter(
 )
 
 
-fp_finishes <- fp_finishes %>% group_by(
-  year, Position
-) %>% mutate(
-  finish = rank(desc(Points), ties.method = 'first')
-) %>% ungroup()
+fp_finishes[is.na(fp_finishes)] <- 0
+
+fp_finishes <- fp_finishes %>% select(
+  first, last, position, year, PASSING_YDS, PASSING_TD, PASSING_INT, 
+  RUSHING_YDS, RUSHING_TD, RECEIVING_REC, RECEIVING_YDS, RECEIVING_TD, 
+  MISC_FL
+)
 
 
-
-
-
-
-# reading in projection data =========================================================================
-
-
-
-finish_url_base <- 'https://www.fantasypros.com/nfl/projections/'
-
-positions <- c('qb', 'wr', 'rb', 'te')
-
-
-for(i in positions){
-  
-  temp_url <- paste(
-    finish_url_base, i, '.php?week=draft', sep = ''
-  )
-  
-  
-  temp_webpage <- read_html(temp_url)
-  
-  temp_tables <- html_nodes(temp_webpage, 'table')
-  
-  table_count <- c(1 : length(temp_tables))
-  
-  for( t in table_count){
-    
-    if(temp_tables[[t]] %>% html_table %>% 
-       nrow() > 30){
-      tbl_num <- t
-    }
-  }
-  
-  temp_finish <- temp_tables[[tbl_num]] %>% 
-    html_table()
-  
-  
-  # only selecting first and last rows because these are 
-  # always player name and projected fantasy points
-  temp_finish <- temp_finish[, c(1, ncol(temp_finish))]
-  
-  names(temp_finish) <- temp_finish[2, ]
-  
-  temp_finish <- temp_finish[-c(1:2), ]
-  
-  temp_assign <- paste(
-    'projection_', i, sep = ''
-  )
-  
-  temp_finish <- temp_finish %>% mutate(
-    position = toupper(i)
-  )
-  
-  assign(temp_assign, temp_finish)
-  
-}
-
-
-
-
-
-
-# binding projection data ===========================================================================
-
-fp_projections <- bind_rows(
-  projection_qb, projection_wr, projection_rb, projection_te
+fp_finishes[, c(5:13)] <- lapply(
+  fp_finishes[, c(5:13)], 
+  function(x) str_replace(x, pattern = ',', replacement = '')
 )
 
 
 
-fp_projections <- fp_projections %>% separate(
-  Player, into = c('first', 'last'), extra = 'drop', 
-  sep = ' '
+fp_finishes[, c(5:13)] <- lapply(
+  fp_finishes[, c(5:13)], as.numeric
 )
-
-fp_projections[, c('first', 'last')] <- lapply(
-  fp_projections[, c('first', 'last')], tolower
-)
-
-fp_projections <- fp_projections %>% filter(
-  !is.na(first) & !is.na(last)
-)
-
-
-fp_projections$FPTS <- as.numeric(fp_projections$FPTS)
-
-fp_projections <- fp_projections %>% group_by(
-  position
-) %>% mutate(
-  finish = rank(desc(FPTS), ties.method = 'first')
-) %>% ungroup()
-
 
 
 

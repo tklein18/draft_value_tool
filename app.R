@@ -19,6 +19,8 @@ library(shiny)
 library(tidyverse)
 library(ggplot2)
 library(shinythemes)
+library(viridis)
+library(plotly)
 
 
 # data
@@ -30,6 +32,10 @@ projections <- read.csv('data/fp_projections_19.csv')
 
 
 # creating list of players names 
+
+finishes <- finishes %>% mutate(
+  Name = str_c(first, last, sep = ' ')
+)
 
 projections <- projections %>% mutate(
   Name = str_c(first, last, sep = ' ')
@@ -73,8 +79,11 @@ ui <- fluidPage(
         choices = players, multiple = T, width = '100%'
       ), h3('Top Reamaning Players'), 
       tableOutput(outputId = 'top_remaining'), 
+      br(),
       tableOutput(outputId = 'best_table'),
-      plotOutput(outputId = 'remaining_stock')
+      br(),
+      plotlyOutput(outputId = 'remaining_plotly'),
+      br(), br()
     )
   )
 )
@@ -100,6 +109,29 @@ server <- function(input, output) {
     )
     
   })
+  
+  
+  
+  
+  
+  finish_points <- reactive({
+    
+    finishes %>% mutate(
+      Points = (PASSING_YDS / input$qb_yds) + (PASSING_TD * input$qb_tds) +
+        (PASSING_INT * -2) + (RUSHING_YDS * .1) + (RUSHING_TD * 6) +
+        (RECEIVING_REC * input$ppr) + (RECEIVING_YDS * .1) +
+        (RECEIVING_TD * 6) + (MISC_FL * -2)
+    )%>% group_by(
+      year, position
+    ) %>% mutate(
+      finish = rank(desc(Points), ties.method = 'first')
+    ) %>% ungroup() %>% select(
+      Name, position, year, Points, finish
+    )
+    
+  })
+  
+  
   
   
   
@@ -138,22 +170,22 @@ server <- function(input, output) {
   
   
   actual_averages <- reactive({
-    finishes %>% filter(
+    finish_points() %>% filter(
       (
-        Position == 'QB' & 
+        position == 'QB' & 
           finish <= input$league_size
       ) | 
         (
-          Position == 'TE' & 
+          position == 'TE' & 
             finish <= input$league_size
         ) | (
-          Position == 'WR' & 
+          position == 'WR' & 
             finish <= (2*input$league_size)
         ) | (
-          Position == 'RB' & 
+          position == 'RB' & 
             finish <= (2*input$league_size)
         ) 
-    ) %>% group_by(Position) %>% 
+    ) %>% group_by(position) %>% 
       summarize(
         act_average = median(Points)
       )
@@ -171,7 +203,7 @@ server <- function(input, output) {
     
     av_adj <- left_join(
       av_adj, actual_averages(), 
-      by = c('position' = 'Position')
+      by = c('position')
     )
     
     av_adj <- av_adj %>% mutate(
@@ -236,7 +268,7 @@ server <- function(input, output) {
   
   
   
-  output$remaining_stock <- renderPlot({
+  remaining_stock <- reactive({
     
     stock_graph <- available_adjusted() %>% group_by(position) %>%
       mutate(
@@ -246,12 +278,43 @@ server <- function(input, output) {
       proj_rank <= (2*input$league_size)
     )
     
-    stock_graph %>% ggplot(aes(proj_rank, proj_value))+
-      geom_line(aes(color = position))+
+    stock_graph %>% ggplot(aes(
+      proj_rank, proj_value, text = paste(
+        'Name: ', Name, '<br>', 
+        'Position: ', position, '<br>', 
+        'Projected Rank: ', proj_rank, '<br>',
+        'Projected Value: ', round(proj_value, 0), '<br>',
+        'Points: ', round(Points, 0)
+      )
+      ))+
+      geom_line(aes(color = position, group = 1))+
       geom_point(aes(color = position))+
-      theme_bw()
+      theme_bw()+
+      scale_y_continuous(name = 'Projected Value')+
+      scale_x_continuous(name = 'Remaining Positional Rank')+
+      scale_color_viridis_d(
+        name = 'Position'
+        )
     
   })
+  
+  
+  
+  output$remaining_plotly <- renderPlotly({
+    
+    remaining_stock() %>% ggplotly(tooltip = 'text')
+    
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
 }
